@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://7kpm5cmysag6"]
+
+[ext_resource type="Script" uid="uid://bu23ofo1ye64s" path="res://scripts/grid_manager.gd" id="1_j0bxf"]
+[ext_resource type="PackedScene" uid="uid://dow801v3cn1uq" path="res://scene/tile.tscn" id="2_1m034"]
+
+[node name="GridManager" type="Node2D" groups=["GridManager"]]
+script = ExtResource("1_j0bxf")
+tile_scene = ExtResource("2_1m034")

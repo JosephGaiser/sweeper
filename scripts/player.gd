@@ -1,0 +1,91 @@
+class_name Player
+extends CharacterBody2D
+
+signal player_action_reveal(grid_pos: Vector2i)
+signal player_action_flag(grid_pos: Vector2i)
+
+@export var move_speed: float = 1800  # Speed of movement between tiles
+@export var starting_grid_pos: Vector2i = Vector2i(0, 0)
+@export var action_range: int = 1
+
+var previous_grid_position: Vector2i
+var grid_position: Vector2i
+var target_world_position: Vector2
+var is_moving: bool = false
+var grid_manager: GridManager
+
+func _ready():
+	grid_manager = get_tree().get_first_node_in_group("GridManager")
+	set_grid_position(starting_grid_pos)
+	grid_manager.player_stepped_on_tile(starting_grid_pos)
+
+func _input(event):
+	if is_moving:
+		return  # Don't accept input while moving
+	
+	var input_direction = Vector2i(Input.get_vector("move_left", "move_right", "move_up", "move_down"))
+	if input_direction != Vector2i.ZERO and !is_moving:
+		attempt_move(input_direction)
+	
+	# Action input
+	if event.is_action_pressed("reveal_tile"):
+		reveal_current_tile()
+	elif event.is_action_pressed("flag_tile"):
+		flag_current_tile()
+
+func _physics_process(delta):
+	if is_moving:
+		# Smooth movement to target position
+		var distance_to_target = position.distance_to(target_world_position)
+		print("target distance:", distance_to_target)
+		print("target_pos: ", target_world_position, "position: ", position)
+		if distance_to_target < .5:  # Close enough to target
+			position = target_world_position
+			is_moving = false
+			on_movement_complete()
+		else:
+			# Move towards target
+			var direction = (target_world_position - position).normalized()
+			velocity = direction * (move_speed * delta)
+			move_and_slide()
+
+func attempt_move(direction: Vector2i):
+	var new_grid_pos = grid_position + direction
+	if grid_manager.is_valid_grid_position(new_grid_pos):
+		move_to_grid_position(new_grid_pos)
+
+func move_to_grid_position(new_grid_pos: Vector2i):
+	previous_grid_position = grid_position
+	grid_position = new_grid_pos
+	target_world_position = grid_manager.grid_to_world(new_grid_pos)
+	is_moving = true
+
+func set_grid_position(new_grid_pos: Vector2i):
+	previous_grid_position = grid_position
+	grid_position = new_grid_pos
+	position = grid_manager.grid_to_world(grid_position)
+	target_world_position = position
+
+func on_movement_complete():
+	grid_manager.player_stepped_on_tile(grid_position)
+	grid_manager.player_stepped_off_tile(previous_grid_position)
+	# TODO add other completion effects here
+
+func reveal_current_tile():
+	var target_position = grid_manager.world_to_grid(get_global_mouse_position())
+	if grid_position.distance_to(target_position) > action_range:
+		return
+	if !grid_manager.is_valid_grid_position(target_position):
+		return
+	print("reveal: ", target_position)
+	player_action_reveal.emit(target_position)
+
+func flag_current_tile():
+	var target_position = grid_manager.world_to_grid(get_global_mouse_position())
+	if !grid_manager.is_valid_grid_position(target_position):
+		return
+	print("flag: ", target_position)
+	player_action_flag.emit(target_position)
+
+func get_current_grid_position() -> Vector2i:
+	return grid_position

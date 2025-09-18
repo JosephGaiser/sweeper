@@ -1,0 +1,63 @@
+[gd_scene load_steps=10 format=3 uid="uid://cvaxv6l72qcoi"]
+
+[ext_resource type="Environment" uid="uid://db57qrubbtens" path="res://misc/main_environment.tres" id="1_0ha60"]
+[ext_resource type="PackedScene" uid="uid://b3ge83l8fbscy" path="res://scene/ui.tscn" id="1_brvut"]
+[ext_resource type="PackedScene" uid="uid://hgwj10w5ihe2" path="res://scene/player.tscn" id="1_itxqv"]
+[ext_resource type="Script" uid="uid://bhexx6mj1xv3q" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_2d.gd" id="2_of57s"]
+[ext_resource type="PackedScene" uid="uid://iaubdlt5xg0o" path="res://scene/game_manager.tscn" id="3_4j5ol"]
+[ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="3_b5f6u"]
+[ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="4_tqoya"]
+[ext_resource type="PackedScene" uid="uid://7kpm5cmysag6" path="res://scene/grid_manager.tscn" id="6_of57s"]
+
+[sub_resource type="Resource" id="Resource_k65ib"]
+script = ExtResource("3_b5f6u")
+
+[node name="Main" type="Node2D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource("1_0ha60")
+
+[node name="PhantomCamera2D" type="Node2D" parent="." node_paths=PackedStringArray("follow_target")]
+top_level = true
+script = ExtResource("2_of57s")
+follow_mode = 2
+follow_target = NodePath("../Player")
+zoom = Vector2(4, 4)
+tween_resource = SubResource("Resource_k65ib")
+tween_on_load = false
+metadata/_custom_type_script = "uid://bhexx6mj1xv3q"
+
+[node name="Camera2D" type="Camera2D" parent="PhantomCamera2D"]
+physics_interpolation_mode = 1
+zoom = Vector2(4, 4)
+
+[node name="PhantomCameraHost" type="Node" parent="PhantomCamera2D/Camera2D"]
+process_priority = 300
+process_physics_priority = 300
+script = ExtResource("4_tqoya")
+metadata/_custom_type_script = "uid://bd046eokvcnu2"
+
+[node name="GameManager" parent="." node_paths=PackedStringArray("player", "grid_manager", "ui") instance=ExtResource("3_4j5ol")]
+player = NodePath("../Player")
+grid_manager = NodePath("../GameBoard/GridManager")
+ui = NodePath("../UICanvasLayer/UI")
+
+[node name="GameBoard" type="Node2D" parent="."]
+
+[node name="GridManager" parent="GameBoard" instance=ExtResource("6_of57s")]
+grid_width = 7
+grid_height = 7
+tile_size = 18
+
+[node name="TileContainer" type="Node2D" parent="GameBoard"]
+unique_name_in_owner = true
+
+[node name="Player" parent="." instance=ExtResource("1_itxqv")]
+motion_mode = 1
+move_speed = 5000.0
+starting_grid_pos = Vector2i(3, 3)
+
+[node name="UICanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="UI" parent="UICanvasLayer" instance=ExtResource("1_brvut")]
+mouse_filter = 1

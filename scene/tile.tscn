@@ -1,0 +1,64 @@
+[gd_scene load_steps=8 format=3 uid="uid://dow801v3cn1uq"]
+
+[ext_resource type="Script" uid="uid://5wwsf80qrs5l" path="res://scripts/Tile.gd" id="1_ohn6f"]
+[ext_resource type="Texture2D" uid="uid://11iepm86tjpe" path="res://assets/sprites/flag.png" id="2_fa2uf"]
+[ext_resource type="Texture2D" uid="uid://bfqqswmg166qf" path="res://assets/sprites/tile_occupied.png" id="2_vtdo3"]
+[ext_resource type="Texture2D" uid="uid://bdljej1mddswl" path="res://assets/sprites/tile_background.png" id="3_baj2x"]
+[ext_resource type="Texture2D" uid="uid://cil11lilsk73t" path="res://assets/sprites/bomb.png" id="4_doujx"]
+[ext_resource type="Theme" uid="uid://bfvam7jua4uga" path="res://misc/main_theme.tres" id="6_baj2x"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_baj2x"]
+size = Vector2(18, 18)
+
+[node name="Tile" type="Node2D"]
+script = ExtResource("1_ohn6f")
+
+[node name="HoverArea2D" type="Area2D" parent="."]
+collision_layer = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HoverArea2D"]
+shape = SubResource("RectangleShape2D_baj2x")
+
+[node name="Sprites" type="Node2D" parent="."]
+
+[node name="Background" type="Sprite2D" parent="Sprites"]
+unique_name_in_owner = true
+texture = ExtResource("3_baj2x")
+
+[node name="PlayerIndicator" type="Sprite2D" parent="Sprites"]
+unique_name_in_owner = true
+visible = false
+texture = ExtResource("2_vtdo3")
+
+[node name="Content" type="Sprite2D" parent="Sprites"]
+unique_name_in_owner = true
+visible = false
+
+[node name="Flag" type="Sprite2D" parent="Sprites"]
+unique_name_in_owner = true
+visible = false
+texture = ExtResource("2_fa2uf")
+
+[node name="Mine" type="Sprite2D" parent="Sprites"]
+unique_name_in_owner = true
+visible = false
+texture = ExtResource("4_doujx")
+
+[node name="AdjacentMinesLabel" type="Label" parent="."]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -2.0
+offset_top = -8.0
+offset_right = 4.0
+offset_bottom = 5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("6_baj2x")
+horizontal_alignment = 1
+
+[connection signal="mouse_entered" from="HoverArea2D" to="." method="_on_hover_area_2d_mouse_entered"]
+[connection signal="mouse_exited" from="HoverArea2D" to="." method="_on_hover_area_2d_mouse_exited"]

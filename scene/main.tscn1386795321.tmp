@@ -1,0 +1,16 @@
+[gd_scene load_steps=5 format=3 uid="uid://cvaxv6l72qcoi"]
+
+[ext_resource type="PackedScene" uid="uid://b3ge83l8fbscy" path="res://scene/ui.tscn" id="1_brvut"]
+[ext_resource type="PackedScene" uid="uid://hgwj10w5ihe2" path="res://scene/player.tscn" id="1_itxqv"]
+[ext_resource type="PackedScene" uid="uid://b6myvalehg8ft" path="res://scene/mine_field.tscn" id="2_0ha60"]
+[ext_resource type="PackedScene" uid="uid://iaubdlt5xg0o" path="res://scene/game_manager.tscn" id="3_4j5ol"]
+
+[node name="Main" type="Node2D"]
+
+[node name="GameManager" parent="." instance=ExtResource("3_4j5ol")]
+
+[node name="MineField" parent="." instance=ExtResource("2_0ha60")]
+
+[node name="Player" parent="." instance=ExtResource("1_itxqv")]
+
+[node name="UI" parent="." instance=ExtResource("1_brvut")]
