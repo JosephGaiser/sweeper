@@ -1,10 +1,10 @@
 class_name Player
-extends CharacterBody2D
+extends Area2D
 
 signal player_action_reveal(grid_pos: Vector2i)
 signal player_action_flag(grid_pos: Vector2i)
 
-@export var move_speed: float = 1800  # Speed of movement between tiles
+@export var move_duration: float = 0.4  # How long the tween takes
 @export var starting_grid_pos: Vector2i = Vector2i(0, 0)
 @export var action_range: int = 1
 
@@ -13,6 +13,7 @@ var grid_position: Vector2i
 var target_world_position: Vector2
 var is_moving: bool = false
 var grid_manager: GridManager
+var move_tween: Tween
 
 func _ready():
 	grid_manager = get_tree().get_first_node_in_group("GridManager")
@@ -33,32 +34,30 @@ func _input(event):
 	elif event.is_action_pressed("flag_tile"):
 		flag_current_tile()
 
-func _physics_process(delta):
-	if is_moving:
-		# Smooth movement to target position
-		var distance_to_target = position.distance_to(target_world_position)
-		print("target distance:", distance_to_target)
-		print("target_pos: ", target_world_position, "position: ", position)
-		if distance_to_target < .5:  # Close enough to target
-			position = target_world_position
-			is_moving = false
-			on_movement_complete()
-		else:
-			# Move towards target
-			var direction = (target_world_position - position).normalized()
-			velocity = direction * (move_speed * delta)
-			move_and_slide()
-
 func attempt_move(direction: Vector2i):
 	var new_grid_pos = grid_position + direction
 	if grid_manager.is_valid_grid_position(new_grid_pos):
 		move_to_grid_position(new_grid_pos)
 
 func move_to_grid_position(new_grid_pos: Vector2i):
+	if is_moving:
+		return  # Prevent multiple moves at once
+	
 	previous_grid_position = grid_position
 	grid_position = new_grid_pos
 	target_world_position = grid_manager.grid_to_world(new_grid_pos)
 	is_moving = true
+	
+	if move_tween:
+		move_tween.kill()
+	
+	move_tween = create_tween()
+	move_tween.set_ease(Tween.EASE_OUT)
+	move_tween.set_trans(Tween.TRANS_BACK)  # This creates the bouncy "snap" effect
+	
+	move_tween.tween_property(self, "position", target_world_position, move_duration)
+	
+	move_tween.finished.connect(on_movement_complete, CONNECT_ONE_SHOT)
 
 func set_grid_position(new_grid_pos: Vector2i):
 	previous_grid_position = grid_position
@@ -67,13 +66,14 @@ func set_grid_position(new_grid_pos: Vector2i):
 	target_world_position = position
 
 func on_movement_complete():
+	is_moving = false
 	grid_manager.player_stepped_on_tile(grid_position)
 	grid_manager.player_stepped_off_tile(previous_grid_position)
 	# TODO add other completion effects here
 
 func reveal_current_tile():
 	var target_position = grid_manager.world_to_grid(get_global_mouse_position())
-	if grid_position.distance_to(target_position) > action_range:
+	if grid_manager.get_chebyshev_distance(target_position, grid_position) > action_range:
 		return
 	if !grid_manager.is_valid_grid_position(target_position):
 		return

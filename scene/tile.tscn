@@ -28,6 +28,7 @@ texture = ExtResource("3_baj2x")
 [node name="PlayerIndicator" type="Sprite2D" parent="Sprites"]
 unique_name_in_owner = true
 visible = false
+modulate = Color(1, 1, 1, 0.8117647)
 texture = ExtResource("2_vtdo3")
 
 [node name="Content" type="Sprite2D" parent="Sprites"]

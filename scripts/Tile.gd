@@ -16,8 +16,8 @@ enum TileState {
 
 var state: TileState = TileState.HIDDEN
 var has_mine: bool = false
-var adjacent_mines: int = 0
 var has_player: bool = false
+var adjacent_mines: int = 0
 
 # Visual components
 @onready var background_sprite: Sprite2D = %Background
@@ -53,12 +53,22 @@ func reveal() -> bool:
 	tile_revealed.emit(grid_position)
 	return true
 
+func reset() -> bool:	
+	if is_flagged():
+		toggle_flag()
+	state = TileState.HIDDEN
+	set_mine(false)
+	set_adjacent_mines(0)
+	hide_content()
+	obscure_number()
+
+
+	return true
+
 func toggle_flag():
-	print("flagging ", self)
 	if state == TileState.REVEALED:
 		return
 	
-	# un-flag logic
 	if state == TileState.FLAGGED:
 		state = TileState.HIDDEN
 		flag_sprite.visible = false
@@ -68,6 +78,9 @@ func toggle_flag():
 	
 	tile_flagged.emit(grid_position)
 
+func hide_content():
+	content_sprite.texture = null
+
 func show_mine():
 	content_sprite.texture = mine.texture
 
@@ -75,6 +88,9 @@ func show_number():
 	if adjacent_mines == 0:
 		pass
 	adjacent_mines_label.text = str(adjacent_mines)
+
+func obscure_number():
+	adjacent_mines_label.text = ""
 
 func on_player_step():
 	has_player = true

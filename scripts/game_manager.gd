@@ -1,4 +1,9 @@
+class_name GameManager
 extends Node
+
+signal game_over
+signal game_reset
+signal game_won
 
 enum GameState {
 	PLAYING,
@@ -98,7 +103,7 @@ func _on_player_action_reveal(grid_pos: Vector2i):
 		ui.set_tile_revealed_label(str(tiles_revealed))
 		
 		if tile.is_mine():
-			game_over(false)  # Player hit a mine
+			trigger_game_over(false)  # Player hit a mine
 		else:
 			# If it's an empty tile (0 adjacent mines), reveal neighbors
 			if tile.adjacent_mines == 0:
@@ -152,16 +157,18 @@ func check_win_condition():
 	var total_safe_tiles = total_tiles - mine_count
 	
 	if tiles_revealed >= total_safe_tiles:
-		game_over(true)  # Player won
+		trigger_game_over(true)  # Player won
 
-func game_over(won: bool):
+func trigger_game_over(won: bool):
 	if won:
 		current_state = GameState.WON
 		print("Congratulations! You won!")
+		game_won.emit()
 	else:
 		current_state = GameState.LOST
 		print("Game Over! You hit a mine!")
 		reveal_all_mines()
+		game_over.emit()
 
 func reveal_all_mines():
 	for y in range(grid_manager.grid_height):
@@ -179,16 +186,13 @@ func restart_game():
 	# Reset all tiles
 	for y in range(grid_manager.grid_height):
 		for x in range(grid_manager.grid_width):
-			var tile = grid_manager.get_tile_at(Vector2i(x, y))
+			var tile: Tile = grid_manager.get_tile_at(Vector2i(x, y))
 			if tile:
-				# Reset tile to hidden state
-				tile.state = tile.TileState.HIDDEN
-				tile.has_mine = false
-				tile.adjacent_mines = 0
-				tile.update_visual()
+				tile.reset()
 	
 	# Reinitialize
 	initialize_minesweeper()
 	
 	# Reset player position
 	player.set_grid_position(player.starting_grid_pos)
+	game_reset.emit()

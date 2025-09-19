@@ -9,8 +9,10 @@
 [ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="4_tqoya"]
 [ext_resource type="PackedScene" uid="uid://7kpm5cmysag6" path="res://scene/grid_manager.tscn" id="6_of57s"]
 
-[sub_resource type="Resource" id="Resource_k65ib"]
+[sub_resource type="Resource" id="Resource_of57s"]
 script = ExtResource("3_b5f6u")
+duration = 0.3
+metadata/_custom_type_script = "uid://8umksf8e80fw"
 
 [node name="Main" type="Node2D"]
 
@@ -23,15 +25,15 @@ script = ExtResource("2_of57s")
 follow_mode = 2
 follow_target = NodePath("../Player")
 zoom = Vector2(4, 4)
-tween_resource = SubResource("Resource_k65ib")
-tween_on_load = false
+tween_resource = SubResource("Resource_of57s")
+follow_damping = true
+follow_damping_value = Vector2(0.3, 0.3)
 metadata/_custom_type_script = "uid://bhexx6mj1xv3q"
 
-[node name="Camera2D" type="Camera2D" parent="PhantomCamera2D"]
-physics_interpolation_mode = 1
+[node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(4, 4)
 
-[node name="PhantomCameraHost" type="Node" parent="PhantomCamera2D/Camera2D"]
+[node name="PhantomCameraHost" type="Node" parent="Camera2D"]
 process_priority = 300
 process_physics_priority = 300
 script = ExtResource("4_tqoya")
@@ -53,11 +55,13 @@ tile_size = 18
 unique_name_in_owner = true
 
 [node name="Player" parent="." instance=ExtResource("1_itxqv")]
-motion_mode = 1
-move_speed = 5000.0
 starting_grid_pos = Vector2i(3, 3)
 
 [node name="UICanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="UI" parent="UICanvasLayer" instance=ExtResource("1_brvut")]
 mouse_filter = 1
+
+[connection signal="game_over" from="GameManager" to="UICanvasLayer/UI" method="_on_game_manager_game_over"]
+[connection signal="game_reset" from="GameManager" to="UICanvasLayer/UI" method="_on_game_manager_game_reset"]
+[connection signal="game_won" from="GameManager" to="UICanvasLayer/UI" method="_on_game_manager_game_won"]

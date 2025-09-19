@@ -47,6 +47,9 @@ func get_tile_at(grid_pos: Vector2i) -> Tile:
 		return tiles[grid_pos.y][grid_pos.x]
 	return null
 
+func get_chebyshev_distance(pos1: Vector2i, pos2: Vector2i) -> int:
+	return max(abs(pos1.x - pos2.x), abs(pos1.y - pos2.y))
+
 func get_neighbors(grid_pos: Vector2i) -> Array[Vector2i]:
 	var neighbors: Array[Vector2i] = []
 	var directions = [
