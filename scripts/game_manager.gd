@@ -194,5 +194,5 @@ func restart_game():
 	initialize_minesweeper()
 	
 	# Reset player position
-	player.set_grid_position(player.starting_grid_pos)
+	player.reset()
 	game_reset.emit()

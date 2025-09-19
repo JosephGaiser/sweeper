@@ -24,18 +24,27 @@ var grid_manager: GridManager
 var game_manager: GameManager
 var move_tween: Tween
 var ui: UI
+var current_vitality: int = vitality
+var current_stamina: int = stamina
 
 func _ready():
 	ui = get_tree().get_first_node_in_group("UI")
 	await ui.ready
-	ui.set_vitality_label(str(vitality))
-	ui.set_stamina_label(str(stamina))
+	ui.set_vitality_label(str(current_vitality))
+	ui.set_stamina_label(str(current_stamina))
 	
 	grid_manager = get_tree().get_first_node_in_group("GridManager")
 	game_manager = get_tree().get_first_node_in_group("GameManager")
 	
 	set_grid_position(starting_grid_pos)
 	grid_manager.player_stepped_on_tile(starting_grid_pos)
+
+func reset():
+	self.set_grid_position(starting_grid_pos)
+	current_vitality = vitality
+	current_stamina = stamina
+	ui.set_vitality_label(str(current_vitality))
+	ui.set_stamina_label(str(current_stamina))
 
 func _input(event):
 	if game_manager.current_state != GameManager.GameState.PLAYING:
@@ -56,16 +65,16 @@ func _input(event):
 
 func attempt_move(direction: Vector2i):
 	var new_grid_pos = grid_position + direction
-	if grid_manager.is_valid_grid_position(new_grid_pos) and stamina > 0:
+	if grid_manager.is_valid_grid_position(new_grid_pos) and current_stamina > 0:
 		move_to_grid_position(new_grid_pos)
 
 func move_to_grid_position(new_grid_pos: Vector2i):
 	if is_moving:
 		return  # Prevent multiple moves at once
 	
-	stamina -= 1 # Spend 1 stamina to move
-	print("remaining stamina", stamina)
-	ui.set_stamina_label(str(stamina))
+	current_stamina -= 1 # Spend 1 stamina to move
+	print("remaining stamina", current_stamina)
+	ui.set_stamina_label(str(current_stamina))
 
 	previous_grid_position = grid_position
 	grid_position = new_grid_pos
